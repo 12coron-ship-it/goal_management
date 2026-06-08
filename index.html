@@ -1,0 +1,613 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>Horizon | Stealth Life Goal Planner</title>
+  <meta name="description" content="Stealth layout and privacy protection for your personal life goals and milestones.">
+  <!-- Stylesheets -->
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+  <!-- Fullscreen Passcode Lock Overlay -->
+  <div class="passcode-overlay" id="passcodeLockOverlay">
+    <div class="passcode-box">
+      <div style="font-size: 2.2rem; color: var(--color-cyan); margin-bottom: 0.5rem; display: flex; justify-content: center;">
+        <span data-lucide="shield" style="width: 36px; height: 36px;"></span>
+      </div>
+      <div class="passcode-title">ACCESS RESTRICTED</div>
+      <div class="passcode-subtitle">ENTER DECRYPT KEY TO UNLOCK SYSTEM</div>
+      <div class="passcode-dots" id="passcodeDots">
+        <span class="dot"></span>
+        <span class="dot"></span>
+        <span class="dot"></span>
+        <span class="dot"></span>
+      </div>
+      <div class="passcode-keypad">
+        <button class="key-btn" onclick="pressPIN(1)">1</button>
+        <button class="key-btn" onclick="pressPIN(2)">2</button>
+        <button class="key-btn" onclick="pressPIN(3)">3</button>
+        <button class="key-btn" onclick="pressPIN(4)">4</button>
+        <button class="key-btn" onclick="pressPIN(5)">5</button>
+        <button class="key-btn" onclick="pressPIN(6)">6</button>
+        <button class="key-btn" onclick="pressPIN(7)">7</button>
+        <button class="key-btn" onclick="pressPIN(8)">8</button>
+        <button class="key-btn" onclick="pressPIN(9)">9</button>
+        <button class="key-btn text-btn" onclick="pressPIN('clear')">CLR</button>
+        <button class="key-btn" onclick="pressPIN(0)">0</button>
+        <button class="key-btn text-btn" onclick="pressPIN('back')">DEL</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- App Container (Constrained for mobile layout) -->
+  <div class="app-container" id="appContainer">
+
+    <!-- Bottom Navigation Bar (Mobile App UI) -->
+    <nav class="bottom-nav">
+      <a class="bottom-nav-item active" data-tab="dashboard">
+        <span data-lucide="layout-dashboard"></span>
+        <span>Dashboard</span>
+      </a>
+      <a class="bottom-nav-item" data-tab="goals">
+        <span data-lucide="target"></span>
+        <span>Map</span>
+      </a>
+      <a class="bottom-nav-item" data-tab="reflections">
+        <span data-lucide="refresh-cw"></span>
+        <span>Reflect</span>
+      </a>
+      <a class="bottom-nav-item" data-tab="sync">
+        <span data-lucide="database"></span>
+        <span>Data</span>
+      </a>
+    </nav>
+
+    <!-- Main Content Area -->
+    <main class="main-content">
+      
+      <!-- Top Header -->
+      <header class="app-header">
+        <div class="user-profile">
+          <span class="greeting" id="greetingText">SYSTEM STATUS // ONLINE</span>
+          <h1 class="user-name" id="profileStatusLine" style="font-size: 0.9rem; font-family: monospace; color: var(--color-cyan); letter-spacing: 0.5px; margin-top: 0.15rem;">INTEGRITY: SECURED</h1>
+        </div>
+
+        <div class="header-actions">
+          <div class="streak-badge" id="habitStreakBadge" title="連続習慣達成数">
+            <span data-lucide="zap" style="width: 12px; height: 12px;"></span>
+            <span id="streakCountText">0</span>D
+          </div>
+          <!-- Stealth Privacy Toggle button -->
+          <button class="stealth-toggle-btn" id="btnStealthToggle" title="ステルスモード切替">
+            <span data-lucide="eye" style="width: 18px; height: 18px;"></span>
+          </button>
+          <button class="stealth-toggle-btn" id="btnSettings" title="設定">
+            <span data-lucide="settings" style="width: 18px; height: 18px;"></span>
+          </button>
+        </div>
+      </header>
+
+      <!-- PAGE 1: DASHBOARD -->
+      <section id="page-dashboard" class="page active">
+        
+        <!-- Vision Board Card (Discreet style) -->
+        <div class="vision-board" id="dashboardVisionBoard">
+          <div class="vision-board-overlay"></div>
+          <button class="edit-vision-btn" id="btnEditVisionBoard" title="ビジョンボードを編集">
+            <span data-lucide="edit-3" style="width: 14px; height: 14px;"></span>
+          </button>
+          <div class="vision-board-content">
+            <span style="font-size: 0.65rem; text-transform: uppercase; font-weight: 700; color: var(--color-cyan); letter-spacing: 1.5px;">CORE VISION SLOGAN</span>
+            <h2 class="vision-board-title stealth-blur" id="visionBoardQuote">「限界を決めているのは自分自身だ。上を向いて進もう。」</h2>
+            
+            <div class="vision-why-box" id="visionBoardWhyContainer">
+              <strong>WHY / INTENT</strong>
+              <span id="visionBoardWhyText" class="stealth-blur">日々に流されず、自分の人生の主導権を握り続け、常に成長を実感するため。</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Today's Action Checklist Card -->
+        <div class="today-card card">
+          <div class="section-header">
+            <h3 class="section-title">
+              <span data-lucide="check-square" style="color: var(--color-cyan);"></span>
+              <span>TODAY'S ROUTINE</span>
+            </h3>
+            <span class="streak-counter" id="completedCountText">0 / 0</span>
+          </div>
+
+          <!-- Action List Container -->
+          <div class="action-list" id="todayActionList">
+            <!-- Action items dynamically loaded here -->
+          </div>
+        </div>
+
+        <!-- Pillars Progress Card -->
+        <div class="pillars-card card">
+          <h3 class="pillars-title">
+            <span>PILLARS PROGRESS</span>
+            <span data-lucide="activity" style="width: 16px; height: 16px;"></span>
+          </h3>
+          <div class="pillar-list" id="pillarsProgressList">
+            <!-- Pillars dynamically loaded here -->
+          </div>
+        </div>
+
+      </section>
+
+      <!-- PAGE 2: GOALS MANAGEMENT -->
+      <section id="page-goals" class="page">
+        <div class="section-header">
+          <h2 class="section-title">
+            <span data-lucide="target" style="color: var(--color-cyan);"></span>
+            <span>OBJECTIVES MAP</span>
+          </h2>
+          <div style="display: flex; gap: 0.4rem;">
+            <button class="btn btn-secondary btn-sm" id="btnAddNewVision">
+              <span data-lucide="plus"></span>VISION
+            </button>
+            <button class="btn btn-primary btn-sm" id="btnAddNewMilestone">
+              <span data-lucide="plus"></span>GOAL
+            </button>
+          </div>
+        </div>
+
+        <div class="matrix-section" id="goalsMatrixContainer">
+          <!-- Tree Nodes (Vision -> Milestone -> Habit/Action) dynamically loaded here -->
+        </div>
+      </section>
+
+      <!-- PAGE 3: REFLECTIONS -->
+      <section id="page-reflections" class="page">
+        <div class="section-header">
+          <h2 class="section-title">
+            <span data-lucide="refresh-cw" style="color: var(--color-cyan);"></span>
+            <span>RETROSPECTIVE LOG</span>
+          </h2>
+          <button class="btn btn-primary btn-sm" id="btnNewReflection">
+            <span data-lucide="message-square"></span>LOG
+          </button>
+        </div>
+
+        <!-- Effort & Analytics Panel -->
+        <div class="card" style="padding: 1rem; display: flex; flex-direction: column; gap: 1rem;">
+          <h3 style="font-size: 0.8rem; font-weight: 600; color: var(--text-muted); text-transform: uppercase; display: flex; align-items: center; gap: 0.4rem;">
+            <span data-lucide="activity" style="width:14px; height:14px;"></span>
+            <span>EFFORT VISUALIZATION</span>
+          </h3>
+          
+          <!-- Heatmap Container -->
+          <div style="display: flex; flex-direction: column; gap: 0.4rem;">
+            <span style="font-size: 0.7rem; color: var(--text-muted);">過去28日間の習慣達成熱量グリッド</span>
+            <div id="habitHeatmapContainer" style="display: grid; grid-template-columns: repeat(7, 1fr); gap: 0.35rem; max-width: 210px; margin: 0.5rem auto;">
+              <!-- Grid boxes loaded dynamically -->
+            </div>
+            <div style="display: flex; justify-content: space-between; max-width: 210px; margin: 0 auto; font-size: 0.6rem; color: var(--text-dark);">
+              <span>4週間前</span>
+              <span>今日</span>
+            </div>
+          </div>
+
+          <!-- Trend Chart Container -->
+          <div style="display: flex; flex-direction: column; gap: 0.4rem; border-top: 1px solid var(--border-light); padding-top: 0.75rem;">
+            <span style="font-size: 0.7rem; color: var(--text-muted);">週次満足度トレンド (1-5 スコア)</span>
+            <div id="satisfactionTrendChart" style="width: 100%; height: 110px; display: flex; align-items: center; justify-content: center; margin-top: 0.25rem;">
+              <!-- SVG chart loaded dynamically -->
+            </div>
+          </div>
+        </div>
+
+        <div class="reflection-grid">
+          <!-- Timeline of Reflections -->
+          <div class="reflection-timeline" id="reflectionTimeline">
+            <!-- Timeline items loaded dynamically -->
+          </div>
+
+          <!-- Quick Stats -->
+          <div class="reflection-sidebar-stats card" style="display: grid; grid-template-columns: 1fr 1fr; gap: 0.75rem; text-align: center;">
+            <div style="background: rgba(255,255,255,0.01); padding: 0.75rem; border-radius: var(--radius-sm); border: 1px solid var(--border-light);">
+              <span style="font-size: 0.65rem; color: var(--text-muted); display: block;">REVIEWS</span>
+              <span style="font-size: 1.5rem; font-weight: 700; color: var(--color-cyan);" id="statTotalReflections">0</span>
+            </div>
+            <div style="background: rgba(255,255,255,0.01); padding: 0.75rem; border-radius: var(--radius-sm); border: 1px solid var(--border-light);">
+              <span style="font-size: 0.65rem; color: var(--text-muted); display: block;">AVG RATING</span>
+              <span style="font-size: 1.5rem; font-weight: 700; color: var(--color-cyan);" id="statAverageScore">0.0</span>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- PAGE 4: SYNC & BACKUP -->
+      <section id="page-sync" class="page">
+        <div class="section-header">
+          <h2 class="section-title">
+            <span data-lucide="database" style="color: var(--color-cyan);"></span>
+            <span>DATA CENTER</span>
+          </h2>
+        </div>
+
+        <div class="sync-grid">
+          
+          <!-- JSON Complete Backup Box -->
+          <div class="sync-box">
+            <div class="sync-box-title">
+              <span data-lucide="shield" style="color: var(--color-cyan);"></span>
+              <span>完全データ復元 (JSON)</span>
+            </div>
+            <p class="sync-description">
+              すべてのビジョン、マイルストーン、If-Thenプラン、習慣履歴、振り返りログを含む完全なデータを保存・読み込みます。デバイスの引っ越し時などに有効です。
+            </p>
+            <button class="btn btn-primary" id="btnExportJSON">
+              <span data-lucide="download"></span>JSONエクスポート
+            </button>
+            <div class="file-input-wrapper">
+              <button class="file-input-trigger">
+                <span data-lucide="upload"></span>JSONインポート
+              </button>
+              <input type="file" id="importJSONFile" accept=".json">
+            </div>
+          </div>
+
+          <!-- CSV Tabular Editor Box -->
+          <div class="sync-box">
+            <div class="sync-box-title">
+              <span data-lucide="file-spreadsheet" style="color: var(--color-platinum);"></span>
+              <span>簡易目標管理 (CSV)</span>
+            </div>
+            <p class="sync-description">
+              目標（マイルストーン）一覧をExcelやGoogleスプレッドシート等で一括編集する用の入出力機能です。
+            </p>
+            <button class="btn btn-secondary" id="btnExportCSV">
+              <span data-lucide="download"></span>CSVエクスポート
+            </button>
+            <div class="file-input-wrapper">
+              <button class="file-input-trigger">
+                <span data-lucide="upload"></span>CSVインポート
+              </button>
+              <input type="file" id="importCSVFile" accept=".csv">
+            </div>
+          </div>
+
+        </div>
+      </section>
+
+    </main>
+  </div>
+
+  <!-- ==========================================================================
+       MODALS (Pull-up Drawer UI on Mobile)
+       ========================================================================== -->
+
+  <!-- Modal 1: Settings Modal (Theme + Lock configurations) -->
+  <div class="modal-overlay" id="modalSettings">
+    <div class="modal-box">
+      <div class="modal-header">
+        <h3 class="modal-title">SETTINGS // SYSTEM CONFIG</h3>
+        <button class="modal-close" data-close-modal><span data-lucide="x"></span></button>
+      </div>
+      <div class="modal-body" style="display: flex; flex-direction: column; gap: 1.25rem;">
+        
+        <!-- Theme Selector -->
+        <div class="form-group">
+          <label>VISUAL SYSTEM THEME (配色テーマ)</label>
+          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 0.5rem; margin-top: 0.25rem;">
+            <button class="btn btn-secondary btn-sm theme-sel-btn" onclick="changeTheme('cyan')">Carbon Cyan</button>
+            <button class="btn btn-secondary btn-sm theme-sel-btn" onclick="changeTheme('amber')">Amber Matrix</button>
+            <button class="btn btn-secondary btn-sm theme-sel-btn" onclick="changeTheme('crimson')">Obsidian Crimson</button>
+            <button class="btn btn-secondary btn-sm theme-sel-btn" onclick="changeTheme('silver')">Minimal Platinum</button>
+          </div>
+        </div>
+
+        <!-- Lock Configuration -->
+        <div class="form-group" style="border-top: 1px solid var(--border-light); padding-top: 1rem;">
+          <label>SCREEN LOCK KEY (4桁の暗証番号)</label>
+          <div style="display: flex; gap: 0.5rem; margin-top: 0.25rem;">
+            <input type="password" id="inputSettingsPIN" pattern="[0-9]*" inputmode="numeric" maxlength="4" placeholder="未設定" style="font-family: monospace; text-align: center; font-size: 1.1rem; letter-spacing: 6px;">
+            <button class="btn btn-primary btn-sm" id="btnSavePIN" style="flex-shrink:0;">保存</button>
+          </div>
+          <span style="font-size: 0.65rem; color: var(--text-muted); margin-top: 0.25rem; display: block;">
+            空欄にして保存すると、パスコードロックを解除（無効化）できます。
+          </span>
+        </div>
+
+        <div style="border-top: 1px solid var(--border-light); padding-top: 1rem;">
+          <button class="btn btn-secondary" id="btnOpenSystemManual" style="width: 100%; justify-content: center;">
+            <span data-lucide="book-open"></span>本アプリの設計思想・説明書
+          </button>
+        </div>
+
+        <p style="font-size: 0.7rem; color: var(--text-muted); line-height: 1.4; text-align: center;">
+          ※ 個人情報保護のため、名前などの個人識別情報は画面から完全に排除されています。
+        </p>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-secondary" data-close-modal style="width: 100%;">閉じる</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal 2: Edit Vision Board Modal -->
+  <div class="modal-overlay" id="modalEditVisionBoard">
+    <div class="modal-box">
+      <div class="modal-header">
+        <h3 class="modal-title">VISION BOARD EDIT</h3>
+        <button class="modal-close" data-close-modal><span data-lucide="x"></span></button>
+      </div>
+      <div class="modal-body">
+        <form id="formVisionBoard">
+          <div class="form-group">
+            <label for="visionInputQuote">メイン・スローガン / モチベーションメッセージ</label>
+            <textarea id="visionInputQuote" rows="3" placeholder="あなたを奮い立たせるフレーズ"></textarea>
+          </div>
+          <div class="form-group">
+            <label for="visionInputWhy">なぜ目指すのか (Why / Intent)</label>
+            <textarea id="visionInputWhy" rows="3" placeholder="動機や感情的な理由"></textarea>
+          </div>
+          <div class="form-group">
+            <label for="visionInputImageUrl">背景画像URL</label>
+            <input type="text" id="visionInputImageUrl" placeholder="UnsplashなどのURL">
+          </div>
+        </form>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-secondary" data-close-modal>キャンセル</button>
+        <button class="btn btn-primary" id="btnSaveVisionBoard">保存</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal 3: Add/Edit Vision Modal -->
+  <div class="modal-overlay" id="modalAddVision">
+    <div class="modal-box">
+      <div class="modal-header">
+        <h3 class="modal-title" id="visionModalTitle">NEW OBJECTIVE</h3>
+        <button class="modal-close" data-close-modal><span data-lucide="x"></span></button>
+      </div>
+      <div class="modal-body">
+        <form id="formAddVision">
+          <input type="hidden" id="visionIdInput">
+          <div class="form-group">
+            <label for="visionTitleInput">ビジョンのタイトル (OBJ)</label>
+            <input type="text" id="visionTitleInput" required placeholder="例: キャリアアップ / 健康維持">
+          </div>
+          <div class="form-group">
+            <label for="visionWhyInput">達成したい理由 (Why / Intent)</label>
+            <textarea id="visionWhyInput" rows="2" placeholder="モチベーションの引き金になる意図"></textarea>
+          </div>
+          <div class="form-group">
+            <label for="visionRiskInput">未達成時のリスク・代償 (Risk)</label>
+            <textarea id="visionRiskInput" rows="2" placeholder="達成できなかった場合の後悔など"></textarea>
+          </div>
+          <div class="form-group">
+            <label for="visionPillarSelect">人生の領域 (Pillar)</label>
+            <select id="visionPillarSelect" required>
+              <option value="career">💼 Career & Growth (仕事・自己啓発)</option>
+              <option value="finance">💰 Finance (資産・財務)</option>
+              <option value="health">🍎 Health & Wellness (健康・フィットネス)</option>
+              <option value="relationships">👥 Relationships (人間関係・家族)</option>
+              <option value="adventure">✈️ Adventure & Leisure (趣味・旅行)</option>
+              <option value="contribution">🕊️ Contribution & Life (貢献・生き方)</option>
+            </select>
+          </div>
+        </form>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-secondary" data-close-modal>キャンセル</button>
+        <button class="btn btn-primary" id="btnSubmitVision">保存</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal 4: Add/Edit Milestone Modal -->
+  <div class="modal-overlay" id="modalAddMilestone">
+    <div class="modal-box">
+      <div class="modal-header">
+        <h3 class="modal-title" id="milestoneModalTitle">NEW GOAL (KEY RESULT)</h3>
+        <button class="modal-close" data-close-modal><span data-lucide="x"></span></button>
+      </div>
+      <div class="modal-body">
+        <form id="formAddMilestone">
+          <input type="hidden" id="milestoneIdInput">
+          
+          <div class="form-group">
+            <label for="milestoneVisionSelect">紐付ける長期ビジョン</label>
+            <select id="milestoneVisionSelect" required>
+              <!-- Populated dynamically -->
+            </select>
+          </div>
+
+          <div class="form-group">
+            <label for="milestoneTitleInput">目標のタイトル (KR)</label>
+            <input type="text" id="milestoneTitleInput" required placeholder="例: 体脂肪率を14%以下にする">
+          </div>
+
+          <div class="form-row">
+            <div class="form-group">
+              <label for="milestoneDateInput">期限</label>
+              <input type="date" id="milestoneDateInput" required>
+            </div>
+            <div class="form-group">
+              <label for="milestoneProgressInput">現在の進捗度 (%)</label>
+              <input type="number" id="milestoneProgressInput" min="0" max="100" value="0">
+            </div>
+          </div>
+
+          <!-- WOOP: If-Then Plans section -->
+          <div class="form-group">
+            <label>If-Then プラン (障害予測 ＆ 対策)</label>
+            <div class="ifthen-fields" id="ifthenPlansContainer">
+              <!-- If-Then pairs inserted here -->
+            </div>
+            <button type="button" class="btn btn-secondary btn-sm" id="btnAddIfThenRow" style="margin-top: 0.5rem; align-self: flex-start;">
+              <span data-lucide="plus"></span>プラン行を追加
+            </button>
+          </div>
+
+          <!-- Commitment Box Ritual -->
+          <div class="commitment-box" id="commitmentBoxArea">
+            <h4 style="font-size: 0.85rem; font-weight: 600; color: var(--color-cyan);">COMMITMENT CONTRACT</h4>
+            <p style="font-size: 0.7rem; color: var(--text-muted); line-height: 1.4; margin-top: 0.25rem;">
+              私はこの目標を達成するために全力を尽くすことを誓います。予期せぬ困難があっても、自ら設定した If-Then プランを実行します。
+            </p>
+            <div class="commitment-signature-area">
+              <input type="text" class="signature-input" id="commitmentSignature" placeholder="署名 (お名前を入力)">
+            </div>
+          </div>
+
+        </form>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-secondary" data-close-modal>キャンセル</button>
+        <button class="btn btn-primary" id="btnSubmitMilestone">誓約して確定</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal 5: Add/Edit Habit or Action Modal -->
+  <div class="modal-overlay" id="modalAddHabit">
+    <div class="modal-box">
+      <div class="modal-header">
+        <h3 class="modal-title" id="habitModalTitle">NEW ROUTINE</h3>
+        <button class="modal-close" data-close-modal><span data-lucide="x"></span></button>
+      </div>
+      <div class="modal-body">
+        <form id="formAddHabit">
+          <input type="hidden" id="habitIdInput">
+          
+          <div class="form-group">
+            <label for="habitMilestoneSelect">紐付ける目標 (KR)</label>
+            <select id="habitMilestoneSelect" required>
+              <!-- Populated dynamically -->
+            </select>
+          </div>
+
+          <div class="form-group">
+            <label for="habitTitleInput">アクション / 習慣内容</label>
+            <input type="text" id="habitTitleInput" required placeholder="例: 毎日15分シャドーイングを行う">
+          </div>
+
+          <div class="form-group">
+            <label for="habitTypeSelect">種類</label>
+            <select id="habitTypeSelect" required>
+              <option value="habit">🔁 繰り返す習慣（毎日チェック）</option>
+              <option value="task">✅ 1回限りのタスク</option>
+            </select>
+          </div>
+        </form>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-secondary" data-close-modal>キャンセル</button>
+        <button class="btn btn-primary" id="btnSubmitHabit">作成</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal 6: Weekly Reflection Modal -->
+  <div class="modal-overlay" id="modalReflection">
+    <div class="modal-box">
+      <div class="modal-header">
+        <h3 class="modal-title">WEEKLY RETROSPECTIVE</h3>
+        <button class="modal-close" data-close-modal><span data-lucide="x"></span></button>
+      </div>
+      <div class="modal-body">
+        <form id="formReflection">
+          <div class="form-group">
+            <label for="reflectInputScore">今週の満足度スコア（5点満点）</label>
+            <select id="reflectInputScore" required>
+              <option value="5">⭐⭐⭐⭐⭐ 完璧 (5)</option>
+              <option value="4">⭐⭐⭐⭐ 良い (4)</option>
+              <option value="3">⭐⭐⭐ 普通 (3)</option>
+              <option value="2">⭐⭐ 少し課題あり (2)</option>
+              <option value="1">⭐ 改善が必要 (1)</option>
+            </select>
+          </div>
+
+          <div class="form-group">
+            <label for="reflectInputWentWell">Q1. 今週上手くいったアクションと、その要因は何ですか？</label>
+            <textarea id="reflectInputWentWell" rows="3" required placeholder="継続できた習慣、達成できたマイルストーンなど"></textarea>
+          </div>
+
+          <div class="form-group">
+            <label for="reflectInputToImprove">Q2. 発生した障害やボトルネックは何ですか？</label>
+            <textarea id="reflectInputToImprove" rows="3" required placeholder="サボりたくなった誘惑、時間の不足など"></textarea>
+          </div>
+
+          <div class="form-group">
+            <label for="reflectInputAdjustments">Q3. 来週の調整プランや、新たなIf-Then対策はどうしますか？</label>
+            <textarea id="reflectInputAdjustments" rows="3" required placeholder="計画の修正、If-Thenプランの変更・追加など"></textarea>
+          </div>
+        </form>
+      </div>
+      <div class="modal-footer" style="justify-content: space-between; width: 100%;">
+        <button class="btn btn-secondary btn-sm" id="btnQuickSubmitReflection" style="background: rgba(102, 252, 241, 0.05); border: 1px dashed rgba(102, 252, 241, 0.2); color: var(--color-cyan);" title="文章をスキップしてスコアのみ保存">
+          <span data-lucide="zap" style="width: 12px; height: 12px;"></span>簡易保存
+        </button>
+        <div style="display: flex; gap: 0.5rem;">
+          <button class="btn btn-secondary btn-sm" data-close-modal>キャンセル</button>
+          <button class="btn btn-primary btn-sm" id="btnSubmitReflection">保存</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal 7: System Manual Modal -->
+  <div class="modal-overlay" id="modalSystemManual">
+    <div class="modal-box" style="max-height: 85vh;">
+      <div class="modal-header">
+        <h3 class="modal-title" style="display:flex; align-items:center; gap:0.4rem;">
+          <span data-lucide="book-open"></span>SYSTEM MANUAL // 設計思想
+        </h3>
+        <button class="modal-close" id="btnCloseSystemManual"><span data-lucide="x"></span></button>
+      </div>
+      <div class="modal-body manual-doc">
+        <h4>1. なぜこのアプリは「不親切」に設計されているか</h4>
+        <p>
+          一般的な目標・習慣アプリは、カラフルなバッジや「サボった日の赤色の警告」でユーザーを動かそうとします。しかし、行動科学ではこれは逆効果です。サボった自分を責める罪悪感は自己嫌悪を生み、最終的に「アプリを開くこと自体を辞めてしまう」からです。
+        </p>
+        <blockquote>
+          <strong>クリーン・スレート原則 (Clean Slate Principle)</strong><br>
+          過去の失敗は一切問いません。Horizonは昨日のサボりを追及せず、常に「今日できる最初の1歩」だけを提示します。
+        </blockquote>
+
+        <h4>2. 挫折対策：If-Then プランニングの設計</h4>
+        <p>
+          目標達成できないのは意志が弱いからではなく、「忙しい」「疲れた」「雨が降った」という<strong>予測可能な障害</strong>に対処法を決めていないからです。
+        </p>
+        <ul>
+          <li>目標設定時に、必ず「もし〜という障害が起きたら、その時は〜する」という対応策をセットで決定してください。</li>
+          <li>これにより、障害発生時に脳のエネルギーを使うことなく、自動的に行動できるようになります。</li>
+        </ul>
+
+        <h4>3. 限界まで摩擦を削る「2分ルール」と「簡易保存」</h4>
+        <p>
+          「毎日1時間勉強する」「5km走る」といった大きなタスクは、疲れた日に脳の抵抗を受けます。
+        </p>
+        <ul>
+          <li><strong>マイクロステップ</strong>: 習慣を登録する時は「本を開くだけ」「ウェアを着るだけ」で完了できる極小のステップを頭に描いてください。</li>
+          <li><strong>簡易保存</strong>: 日記を書くのすら面倒な日は、振り返りモーダルの「簡易保存」を押すことで、文章をスキップしてスコアのみを1タップで記録できます。</li>
+        </ul>
+
+        <h4>4. 連続記録（Streak）が途切れた時</h4>
+        <p>
+          「1回サボるとすべてが嫌になる」のは完璧主義の罠です。行動科学の鉄則は<strong>「絶対に2日連続で休まない（Never miss twice）」</strong>です。1日サボってしまっても、翌日にアプリを開いてチェックをすれば、自動的にリブートされペナルティなく再スタートできます。
+        </p>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-primary" id="btnConfirmManual" style="width: 100%;">理解した</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Toast Notification Container -->
+  <div class="toast" id="toastNotification">
+    <span id="toastIcon"></span>
+    <span id="toastMessage">保存しました</span>
+  </div>
+
+  <!-- Application Logic -->
+  <script src="app.js"></script>
+</body>
+</html>
